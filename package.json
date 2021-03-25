@@ -1,0 +1,20 @@
+{
+  "name": "nuxt-vuetify-todo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "core-js": "^3.9.1",
+    "luxon": "^1.26.0",
+    "nuxt": "^2.15.3",
+    "vuedraggable": "^2.24.3"
+  },
+  "devDependencies": {
+    "@nuxtjs/vuetify": "^1.11.3"
+  }
+}

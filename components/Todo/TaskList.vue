@@ -1,6 +1,11 @@
 <template>
   <v-list flat class="pt-0">
-    <draggable v-model="tasks" handle=".handle">
+    <draggable
+      v-model="tasks"
+      handle=".handle"
+      @end="dragEnd"
+      @start="dragStart"
+    >
       <div v-for="(task, index) in tasks" :key="task.id">
         <task :task="task" />
         <v-divider
@@ -24,6 +29,18 @@ export default {
       set(value) {
         this.$store.dispatch("todos/setTasks", value);
       },
+    },
+  },
+  methods: {
+    dragStart({ item }) {},
+
+    dragEnd() {
+      // const tasks = this.tasks.map(function (task, index) {
+      //   return { ...task, order: index };
+      // });
+      // console.log("🚀 ~ file: TaskList.vue ~ line 41 ~ tasks ~ tasks", tasks);
+
+    //  this.$store.dispatch("todos/setTasks", tasks);
     },
   },
 };

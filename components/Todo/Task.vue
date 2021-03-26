@@ -90,13 +90,14 @@ export default {
   },
 
   methods: {
-    completeTask(taskId) {
-      this.$store.dispatch("todos/completeTask", taskId);
+    completeTask() {
+      this.$store.dispatch("todos/completeTask", this.task);
     },
     deleteTask() {
       this.$store.dispatch("todos/deleteTask", this.task.id);
     },
     editTask(task) {
+      console.log("🚀 ~ file: Task.vue ~ line 100 ~ editTask ~ task", task);
       this.$store.dispatch("todos/editTask", { id: this.task.id, title: task });
       this.dialogs.edit = false;
     },
@@ -122,7 +123,7 @@ export default {
   opacity: 0;
 }
 .sortable-chosen {
-  background-color: #E3F2FD !important;
+  background-color: #e3f2fd !important;
 }
 .sortable-drag {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);

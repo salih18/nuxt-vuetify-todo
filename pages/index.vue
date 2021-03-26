@@ -2,7 +2,7 @@
   <div id="todo" class="pa-2">
     <add-task />
     <task-list />
-    <button-toggle-sorting />
+    <button-toggle-sorting v-if="$store.state.todos.sorting" />
     <no-task />
     <snackbar />
   </div>
@@ -24,6 +24,9 @@ export default {
     NoTask,
     Snackbar,
     ButtonToggleSorting,
+  },
+  async fetch() {
+    this.$store.dispatch("todos/fetchAllTasks");
   },
   head() {
     return {

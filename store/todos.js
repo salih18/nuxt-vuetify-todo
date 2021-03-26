@@ -1,55 +1,6 @@
 export const state = () => ({
   searchTerm: null,
-  tasks: [
-    {
-      id: 1,
-      status: false,
-      dueDate: "2021-10-16",
-      title: "Design a new website with  framework"
-    },
-    {
-      id: 2,
-      status: false,
-      dueDate: null,
-      title: "Code up the homepage with Vuetify components"
-    },
-    {
-      id: 3,
-      status: false,
-      dueDate: "2021-11-16",
-      title: "Change the styles of yunus by following material design patterns"
-    },
-    {
-      id: 4,
-      status: false,
-      dueDate: "2021-10-12",
-      title: "Resolve issues on the authentication token life"
-    },
-    {
-      id: 5,
-      status: false,
-      dueDate: "2021-11-12",
-      title: "Technician synthesize parse lime encoding feed Adaptive"
-    },
-    {
-      id: 6,
-      status: false,
-      dueDate: "2021-11-10",
-      title: "methodologies technologies Analyst Chicken Home dynamic Wall"
-    },
-    {
-      id: 7,
-      status: false,
-      dueDate: "2021-06-15",
-      title: "Avon Re-engineered synergies customer Turkish Rustic Timor-Leste"
-    },
-    {
-      id: 8,
-      status: false,
-      dueDate: null,
-      title: "discrete Hawaii Operative capacitor Small payment Devolved"
-    }
-  ],
+  tasks: [],
   snackbar: {
     status: false,
     text: `Hello, I'm a snackbar`
@@ -58,12 +9,17 @@ export const state = () => ({
 });
 
 export const mutations = {
+  fetchAllTasks(state, payload) {
+    state.tasks = Object.keys(payload).map(id => {
+      return { id: id, ...payload[id] };
+    });
+  },
   completeTask(state, payload) {
-    const task = state.tasks.find(task => task.id === payload);
+    const task = state.tasks.find(task => task.id === payload.id);
     task.status = !task.status;
   },
   addTask(state, payload) {
-    state.tasks.unshift(payload);
+    state.tasks.push(payload);
   },
   deleteTask(state, payload) {
     state.tasks = state.tasks.filter(task => task.id !== payload);
@@ -74,7 +30,7 @@ export const mutations = {
   editTask(state, payload) {
     state.tasks = state.tasks.map(task => {
       return task.id === payload.id
-        ? { ...payload, status: payload.status }
+        ? { ...payload, status: task.status, dueDate: task.dueDate }
         : { ...task };
     });
   },
@@ -96,42 +52,96 @@ export const mutations = {
 };
 
 export const actions = {
-  completeTask({ commit }, payload) {
-    commit("completeTask", payload);
+  async fetchAllTasks({ commit }) {
+    try {
+      const response = await this.$axios.get(
+        process.env.taskAPI + "/tasks.json"
+      );
+      commit("fetchAllTasks", response.data);
+    } catch (error) {
+      console.log("Error on fetaching tasks", error);
+    }
   },
-  addTask({ commit }, payload) {
+  async completeTask({ commit }, payload) {
+    try {
+      await this.$axios.patch(
+        `${process.env.taskAPI}/tasks/${payload.id}.json`,
+        {
+          status: !payload.status
+        }
+      );
+
+      commit("completeTask", payload);
+    } catch (error) {
+      console.log("Error on completing task", error);
+    }
+  },
+  async addTask({ commit }, payload) {
     if (!payload) {
       return;
     }
     const newTask = {
-      id: Date.now(),
       title: payload,
-      dueDate: null,
-      status: false
+      dueDate: "",
+      status: false,
+      order: 1
     };
 
-    commit("addTask", newTask);
-    commit("setSnackbar", {
-      status: true,
-      text: "New Task successfully added!"
-    });
+    try {
+      const response = await this.$axios.post(
+        process.env.taskAPI + "/tasks.json",
+        newTask
+      );
+      commit("addTask", { id: response.data.name, ...newTask });
+      commit("setSnackbar", {
+        status: true,
+        text: "New Task successfully added!"
+      });
+    } catch (error) {
+      console.log("Error on adding a new Task", error);
+    }
   },
-  deleteTask({ commit }, payload) {
-    commit("deleteTask", payload);
-    commit("setSnackbar", {
-      status: true,
-      text: "The successfully deleted!"
-    });
+  async deleteTask({ commit }, payload) {
+    try {
+      await this.$axios.delete(`${process.env.taskAPI}/tasks/${payload}.json`);
+      commit("deleteTask", payload);
+      commit("setSnackbar", {
+        status: true,
+        text: "The successfully deleted!"
+      });
+    } catch (error) {
+      console.log("Error on deleting the Task", error);
+    }
   },
-  editTask({ commit }, payload) {
-    commit("editTask", payload);
-    commit("setSnackbar", {
-      status: true,
-      text: "The successfully updated!"
-    });
+  async editTask({ commit }, payload) {
+    try {
+      await this.$axios.patch(
+        `${process.env.taskAPI}/tasks/${payload.id}.json`,
+        payload
+      );
+
+      commit("editTask", payload);
+      commit("setSnackbar", {
+        status: true,
+        text: "The successfully updated!"
+      });
+    } catch (error) {
+      console.log("Error on editing the Task", error);
+    }
   },
-  pickDate({ commit }, payload) {
-    commit("pickDate", payload);
+  async pickDate({ commit }, payload) {
+    const toEdited = {
+      dueDate: payload.dueDate
+    };
+    try {
+      await this.$axios.patch(
+        `${process.env.taskAPI}/tasks/${payload.id}.json`,
+        toEdited
+      );
+      commit("pickDate", payload);
+    } catch (error) {
+      console.log("Error on picking date in the Task", error);
+    }
   },
   setSearchTerm({ commit }, payload) {
     commit("setSearchTerm", payload);
@@ -139,8 +149,13 @@ export const actions = {
   toggleSorting({ commit }) {
     commit("toggleSorting");
   },
-  setTasks({ commit }, payload) {
-    commit("setTasks", payload);
+  async setTasks({ commit }, payload) {
+    const tasks = payload.map((task, index) => {
+      return { ...task, order: index };
+    });
+    await this.$axios.put(`${process.env.taskAPI}/tasks.json`, tasks);
+
+    commit("setTasks", tasks);
   }
 };
 

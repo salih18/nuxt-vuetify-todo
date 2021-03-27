@@ -16,6 +16,7 @@
     "vuedraggable": "^2.24.3"
   },
   "devDependencies": {
+    "@nuxtjs/pwa": "^3.3.5",
     "@nuxtjs/vuetify": "^1.11.3"
   }
 }

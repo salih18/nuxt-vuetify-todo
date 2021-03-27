@@ -35,7 +35,7 @@ export default {
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
-  modules: ["@nuxtjs/axios"],
+  modules: ["@nuxtjs/axios", "@nuxtjs/pwa"],
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
@@ -57,9 +57,37 @@ export default {
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {
+    // extend(config, ctx) {} // blah blah
+  },
+  // server: {
+  //   host: "0.0.0.0"
+  // },
   env: {
     baseUrl: process.env.BASE_URL || "http://localhost:3000",
     taskAPI: "https://nuxt-vuetify-todo-default-rtdb.firebaseio.com"
+  },
+  pwa: {
+    manifest: {
+      name: "Todo Manager - Manage your tasks",
+      short_name: "TodoM",
+      description: " A Simple Todo Management - Made with Vue",
+      display: "standalone",
+      orientation: "portrait",
+      lang: "en",
+      useWebmanifestExtension: false,
+      background_color: "#ffffff"
+    },
+    meta: {
+      /* meta options */
+    },
+    icon: {
+      /* meta options */
+    },
+    workbox: {
+      /* workbox options */
+      enabled: true,
+      importScripts: ["custom-sw.js"]
+    }
   }
 };

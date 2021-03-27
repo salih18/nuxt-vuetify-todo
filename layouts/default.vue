@@ -59,12 +59,34 @@
         <nuxt />
       </v-container>
     </v-main>
+    <v-banner
+      v-if="showAppInstallBanner"
+      class="app-banner blue lighten-2 d-flex d-sm-none"
+      transition="fade-transition"
+    >
+      <v-avatar tile color="blue">
+        <img src="./../static/icon.png" alt="" />
+      </v-avatar>
+      Do you want to install Todo Manager?
+      <template v-slot:actions>
+        <v-btn text color="white" @click="neverShowAppInstallbanner">
+          Never
+        </v-btn>
+        <v-btn text color="white" @click="showAppInstallBanner = false">
+          Later
+        </v-btn>
+        <v-btn text color="white" @click="installApp"> Yes </v-btn>
+      </template>
+    </v-banner>
   </v-app>
 </template>
 
 <script>
 import { DateTime } from "luxon";
 import Search from "./../components/Shared/Search.vue";
+import Icon from "../static/icon.png";
+let deferredPrompt;
+
 export default {
   name: "NuxtDefault",
   components: {
@@ -77,15 +99,52 @@ export default {
     ],
     drawer: null,
     date: "",
+    showAppInstallBanner: false,
   }),
   methods: {
     currentDate() {
       this.date = DateTime.now().toFormat("DDD, H:mm:ss");
       setTimeout(this.currentDate, 1000);
     },
+    neverShowAppInstallbanner() {
+      this.showAppInstallBanner = false;
+      window.localStorage.setItem("neverShowInstallBanner", true);
+    },
+    async installApp() {
+      this.showAppInstallBanner = false;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        this.neverShowAppInstallbanner();
+      } else {
+      }
+
+      this.deferredPrompt = null;
+    },
   },
   mounted() {
     this.currentDate();
+    let neverShowAppInstallbanner = window.localStorage.getItem(
+      "neverShowInstallBanner"
+    );
+
+    if (!neverShowAppInstallbanner) {
+      window.addEventListener("beforeinstallprompt", (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        // Update UI notify the user they can install the PWA
+
+        this.showAppInstallBanner = true;
+        // Optionally, send analytics event that PWA install promo was shown.
+      });
+    }
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.app-banner {
+}
+</style>

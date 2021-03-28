@@ -86,7 +86,7 @@ export default {
     },
     workbox: {
       /* workbox options */
-      enabled: true,
+      // enabled: true,
       importScripts: ["custom-sw.js"]
     }
   }

@@ -103,7 +103,8 @@ export const actions = {
   },
   async deleteTask({ commit }, payload) {
     try {
-      await this.$axios.delete(`${process.env.taskAPI}/tasks/${payload}.json`);
+      const response = await this.$axios.delete(`${process.env.taskAPI}/tasks/${payload}.json`);
+      console.log("🚀 ~ file: todos.js ~ line 107 ~ deleteTask ~ response", response)
       commit("deleteTask", payload);
       commit("setSnackbar", {
         status: true,
@@ -114,6 +115,7 @@ export const actions = {
     }
   },
   async editTask({ commit }, payload) {
+    console.log("🚀 ~ file: todos.js ~ line 118 ~ editTask ~ payload", payload)
     try {
       await this.$axios.patch(
         `${process.env.taskAPI}/tasks/${payload.id}.json`,
@@ -153,6 +155,7 @@ export const actions = {
     const tasks = payload.map((task, index) => {
       return { ...task, order: index };
     });
+    console.log("🚀 ~ file: todos.js ~ line 158 ~ tasks ~ tasks", tasks)
     await this.$axios.put(`${process.env.taskAPI}/tasks.json`, tasks);
 
     commit("setTasks", tasks);

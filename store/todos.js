@@ -10,16 +10,17 @@ export const state = () => ({
 
 export const mutations = {
   fetchAllTasks(state, payload) {
-    state.tasks = Object.keys(payload).map(id => {
+    const tasks = Object.keys(payload).map(id => {
       return { id: id, ...payload[id] };
     });
+    state.tasks = tasks.sort((a, b) => a.order - b.order);
   },
   completeTask(state, payload) {
     const task = state.tasks.find(task => task.id === payload.id);
     task.status = !task.status;
   },
   addTask(state, payload) {
-    state.tasks.push(payload);
+    state.tasks.unshift(payload);
   },
   deleteTask(state, payload) {
     state.tasks = state.tasks.filter(task => task.id !== payload);
@@ -84,7 +85,7 @@ export const actions = {
       title: payload,
       dueDate: "",
       status: false,
-      order: 1
+      order: -1
     };
 
     try {
@@ -103,8 +104,8 @@ export const actions = {
   },
   async deleteTask({ commit }, payload) {
     try {
-      const response = await this.$axios.delete(`${process.env.taskAPI}/tasks/${payload}.json`);
-      console.log("🚀 ~ file: todos.js ~ line 107 ~ deleteTask ~ response", response)
+      await this.$axios.delete(`${process.env.taskAPI}/tasks/${payload}.json`);
+
       commit("deleteTask", payload);
       commit("setSnackbar", {
         status: true,
@@ -115,7 +116,6 @@ export const actions = {
     }
   },
   async editTask({ commit }, payload) {
-    console.log("🚀 ~ file: todos.js ~ line 118 ~ editTask ~ payload", payload)
     try {
       await this.$axios.patch(
         `${process.env.taskAPI}/tasks/${payload.id}.json`,
@@ -152,13 +152,18 @@ export const actions = {
     commit("toggleSorting");
   },
   async setTasks({ commit }, payload) {
-    const tasks = payload.map((task, index) => {
+    const orderedTasks = payload.map((task, index) => {
       return { ...task, order: index };
     });
-    console.log("🚀 ~ file: todos.js ~ line 158 ~ tasks ~ tasks", tasks)
+
+    const tasks = orderedTasks.reduce((acc, val) => {
+      acc[val.id] = val;
+      return acc;
+    }, {});
+
     await this.$axios.put(`${process.env.taskAPI}/tasks.json`, tasks);
 
-    commit("setTasks", tasks);
+    commit("setTasks", orderedTasks);
   }
 };
 
